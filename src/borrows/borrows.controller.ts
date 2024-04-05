@@ -20,7 +20,7 @@ export class BorrowsController {
   
   @Get(':id/borrows')
   async getBorrowsByUser(@Param('id') userId: string): Promise<Borrow[]> {
-    return this.borrowsService.findBorrowsByUser(+userId);
+    return this.borrowsService.findBorrowsByUser(parseInt(userId));
   }
 
 }

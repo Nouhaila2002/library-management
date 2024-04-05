@@ -1,10 +1,10 @@
-// src/borrows/borrows.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Borrow } from '../borrow.entity';
 import { User } from '../user.entity';
 import { Book } from '../book.entity';
+import { BookNotAvailableException } from './BookNotAvailableException';
 
 
 @Injectable()
@@ -30,7 +30,7 @@ export class BorrowsService {
     }
 
     if (!book.isAvailable) {
-      throw new Error('Book is not available for borrowing');
+      throw new BookNotAvailableException();//throw new Error('Book is not available for borrowing');
     }
 
     book.isAvailable = false;
@@ -45,8 +45,9 @@ export class BorrowsService {
     return this.borrowRepository.save(borrow);
   }
 
-  async returnBook(borrowId: number): Promise<void> {
-    const borrow = await this.borrowRepository.findOne({ where: { id: Number(borrowId) } });
+  async returnBook(borrowId: number): Promise<Borrow> {
+    const borrow = await this.borrowRepository.findOne({ where: { id: Number(borrowId) } , relations: ['book']});
+    console.log(borrow.book)
     if (!borrow) {
       throw new NotFoundException('Borrow not found');
     }
@@ -56,10 +57,20 @@ export class BorrowsService {
 
     borrow.book.isAvailable = true;
     await this.bookRepository.save(borrow.book);
+
+    return this.borrowRepository.save(borrow);
   }
 
   
   async findBorrowsByUser(userId: number): Promise<Borrow[]> {
+  //  const allBorrows = await this.borrowRepository.find({ relations: ['user'] });   
+   // const userBorrows = allBorrows.filter(borrow => borrow.user.id === userId);
+
+    
+   /* return await this.borrowRepository.find({ 
+      where: { user: { id: userId } },
+      relations: ['user', 'book'] 
+    }); //this.borrowRepository.find({ where: { user: { id: userId } } , relations: ['user']});*/
     return this.borrowRepository.find({ where: { user: { id: userId } } });
   }
 
