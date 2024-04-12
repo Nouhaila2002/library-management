@@ -5,6 +5,7 @@ import { Borrow } from '../borrow.entity';
 import { User } from '../user.entity';
 import { Book } from '../book.entity';
 import { BookNotAvailableException } from './BookNotAvailableException';
+import { error } from 'console';
 
 
 @Injectable()
@@ -45,19 +46,18 @@ export class BorrowsService {
     return this.borrowRepository.save(borrow);
   }
 
-  async returnBook(borrowId: number): Promise<Borrow> {
-    const borrow = await this.borrowRepository.findOne({ where: { id: Number(borrowId) } , relations: ['book']});
-    console.log(borrow.book)
+  async returnBook(borrowId: string): Promise<Borrow> {
+    const borrow = await this.borrowRepository.findOne({ where: { id: parseInt(borrowId) } , relations: ['book']});
+    
     if (!borrow) {
       throw new NotFoundException('Borrow not found');
     }
 
     borrow.returnDate = new Date();
-    await this.borrowRepository.save(borrow);
+   
 
     borrow.book.isAvailable = true;
     await this.bookRepository.save(borrow.book);
-
     return this.borrowRepository.save(borrow);
   }
 
@@ -71,7 +71,10 @@ export class BorrowsService {
       where: { user: { id: userId } },
       relations: ['user', 'book'] 
     }); //this.borrowRepository.find({ where: { user: { id: userId } } , relations: ['user']});*/
-    return this.borrowRepository.find({ where: { user: { id: userId } } });
+    return this.borrowRepository.find({ 
+      where: { user: { id: userId } },
+      relations: ['user', 'book'] 
+    });
   }
 
 }

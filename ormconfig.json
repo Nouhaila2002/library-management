@@ -1,11 +1,10 @@
 {
     "type": "mysql",
     "host": "host.docker.internal",
-    "port": 3306,
+    "port": 3307,  
     "username": "root",
     "password": "root",
-    "database": "my_database",
+    "database": "library_managementDB",
     "entities": ["dist/**/*.entity{.ts,.js}"],
     "synchronize": true
 }
-  
